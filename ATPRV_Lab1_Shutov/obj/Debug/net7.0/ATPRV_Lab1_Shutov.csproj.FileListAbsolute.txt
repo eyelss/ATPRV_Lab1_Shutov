@@ -1,0 +1,15 @@
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.csproj.AssemblyReference.cache
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.GeneratedMSBuildEditorConfig.editorconfig
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.AssemblyInfoInputs.cache
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.AssemblyInfo.cs
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.csproj.CoreCompileInputs.cache
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\bin\Debug\net7.0\ATPRV_Lab1_Shutov.exe
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\bin\Debug\net7.0\ATPRV_Lab1_Shutov.deps.json
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\bin\Debug\net7.0\ATPRV_Lab1_Shutov.runtimeconfig.json
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\bin\Debug\net7.0\ATPRV_Lab1_Shutov.dll
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\bin\Debug\net7.0\ATPRV_Lab1_Shutov.pdb
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.dll
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\refint\ATPRV_Lab1_Shutov.dll
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.pdb
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ATPRV_Lab1_Shutov.genruntimeconfig.cache
+D:\Repos\ATPRV_Lab1_Shutov\ATPRV_Lab1_Shutov\obj\Debug\net7.0\ref\ATPRV_Lab1_Shutov.dll
