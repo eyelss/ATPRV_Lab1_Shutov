@@ -100,6 +100,23 @@ namespace ATPRV_Shutov_Lab1
             return vector1.Zip(vector2, (first, second) => first * second).Sum();
         }
 
+        public static double[,] MakeMatrix(int rows, int cols, double @base, Func<double, double> func)
+        {
+            double[,] result = new double[rows, cols];
+            double prev = @base;
+            
+            for (int i = 0; i < rows; ++i)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    result[i, j] = prev;
+                    prev = func(prev);
+                }
+            }
+
+            return result;
+        }
+
         public static void Main(string[] args)
         {
             var eyeMatrix = new double[,]
