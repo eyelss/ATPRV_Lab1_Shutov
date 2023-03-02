@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
+using System.Diagnostics;
 namespace ATPRV_Shutov_Lab1
 {
     public static class ArrayExt {
@@ -143,43 +143,52 @@ namespace ATPRV_Shutov_Lab1
 
         public static void Main(string[] args)
         {
-            var eyeMatrix = new double[,]
-            {
-                {1, 0, 0},
-                {0, 1, 0},
-                {0, 0, 1},
-            };
+            Stopwatch watch;
 
-            var raiseMatrix = new double[,]
+            int[] matrixSizes = { 10, 50, 100 /*, 200, 500, 1000 */ };
+            List<double[,]> matrixes = new List<double[,]>();
+            
+            foreach (var size in matrixSizes)
             {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9},
-            };
-
-            var oneMatrix = new double[,]
+                matrixes.Add(MakeMatrix(size, size, 1.0, (x) => x + 0.1));
+            }
+            
+            // CLASSIC:
+            Console.WriteLine("Classic");
+            matrixes.ForEach(matrix =>
             {
-                {1, 1, 1},
-                {1, 1, 1},
-                {1, 1, 1},
-            };
+                watch = Stopwatch.StartNew();
+                MultiplyMatrix(matrix, matrix);
+                watch.Stop();
+                Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
+            });
 
-            // foreach (var i in raiseMatrix.SliceRow(1))
-            // {
-            //     Console.WriteLine(i);
-            // }
-            //
-            // foreach (var i in raiseMatrix.SliceColumn(1))
-            // {
-            //     Console.WriteLine(i);
-            // }
-            var vec1 = new double[,] { { 1, 1, 1 } };
-            var vec2 = new double[,] { { 1 }, { 2 }, { 3 } };
-            // PrintMatrix(MultiplyMatrix(raiseMatrix, oneMatrix));
-            // PrintMatrix(ThreadMatrixMultiply(raiseMatrix, oneMatrix, 2));
-            // PrintMatrix(MultiplyMatrix(vec1, vec2));
-            PrintMatrix(ChaosThreadMultiplyMatrix(vec1, vec2));
-            // PrintMatrix(MakeMatrix(5, 5, 0.1, (x) => 2*x));
+            // PARALLEL 1:
+            Console.WriteLine("Parallel 1");
+            int[] threadsCount = { 2, 4, 8, 16 };
+
+            foreach (var threadCount in threadsCount)
+            {
+                Console.WriteLine($"    Threads: {threadCount}");
+                matrixes.ForEach(matrix =>
+                {
+                    watch = Stopwatch.StartNew();
+                    ThreadMatrixMultiply(matrix, matrix, threadCount);
+                    watch.Stop();
+                    Console.WriteLine($"        Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
+                });
+            }
+
+            // PARALLEL 2:
+            Console.WriteLine("Parallel 2");
+            matrixes.ForEach(matrix =>
+            {
+                watch = Stopwatch.StartNew();
+                ChaosThreadMultiplyMatrix(matrix, matrix);
+                watch.Stop();
+                Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
+            });
+
             Console.ReadKey();
         }
     }
