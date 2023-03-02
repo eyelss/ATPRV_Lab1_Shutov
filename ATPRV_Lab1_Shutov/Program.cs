@@ -111,10 +111,10 @@ namespace ATPRV_Shutov_Lab1
                         result[jCopy, iCopy] = MultiplyRow(matrix1.SliceRow(iCopy).ToArray(), matrix2.SliceColumn(jCopy).ToArray()); 
                     });
                     thread.Start();
-                    threads.Append(thread);
+                    threads.Add(thread);
                 }
             }
-            
+
             threads.ForEach(thread => thread.Join());
             return result;
         }
@@ -178,7 +178,7 @@ namespace ATPRV_Shutov_Lab1
             // PrintMatrix(MultiplyMatrix(raiseMatrix, oneMatrix));
             // PrintMatrix(ThreadMatrixMultiply(raiseMatrix, oneMatrix, 2));
             // PrintMatrix(MultiplyMatrix(vec1, vec2));
-            PrintMatrix(ChaosThreadMultiplyMatrix(raiseMatrix, oneMatrix));
+            PrintMatrix(ChaosThreadMultiplyMatrix(vec1, vec2));
             // PrintMatrix(MakeMatrix(5, 5, 0.1, (x) => 2*x));
             Console.ReadKey();
         }
