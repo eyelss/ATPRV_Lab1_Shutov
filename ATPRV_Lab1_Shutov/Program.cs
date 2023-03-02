@@ -95,6 +95,30 @@ namespace ATPRV_Shutov_Lab1
             return result;
         }
 
+        public static double[,] ChaosThreadMultiplyMatrix(double[,] matrix1, double[,] matrix2, double[,]? templ = null)
+        {
+            List<Thread> threads = new List<Thread>();
+
+            double[,] result = templ ?? new double[matrix1.GetLength(0), matrix2.GetLength(1)];
+            for (int i = 0; i < matrix1.GetLength(0); ++i)
+            {
+                for (int j = 0; j < matrix2.GetLength(1); ++j)
+                {
+                    var jCopy = j;
+                    var iCopy = i;
+                    var thread = new Thread(() =>
+                    {
+                        result[jCopy, iCopy] = MultiplyRow(matrix1.SliceRow(iCopy).ToArray(), matrix2.SliceColumn(jCopy).ToArray()); 
+                    });
+                    thread.Start();
+                    threads.Append(thread);
+                }
+            }
+            
+            threads.ForEach(thread => thread.Join());
+            return result;
+        }
+
         public static double MultiplyRow(double[] vector1, double[] vector2)
         {
             return vector1.Zip(vector2, (first, second) => first * second).Sum();
@@ -109,7 +133,7 @@ namespace ATPRV_Shutov_Lab1
             {
                 for (int j = 0; j < cols; j++)
                 {
-                    result[i, j] = prev;
+                    result[j, i] = prev;
                     prev = func(prev);
                 }
             }
@@ -151,9 +175,11 @@ namespace ATPRV_Shutov_Lab1
             // }
             var vec1 = new double[,] { { 1, 1, 1 } };
             var vec2 = new double[,] { { 1 }, { 2 }, { 3 } };
-            PrintMatrix(MultiplyMatrix(raiseMatrix, oneMatrix));
-            PrintMatrix(ThreadMatrixMultiply(raiseMatrix, oneMatrix, 2));
+            // PrintMatrix(MultiplyMatrix(raiseMatrix, oneMatrix));
+            // PrintMatrix(ThreadMatrixMultiply(raiseMatrix, oneMatrix, 2));
             // PrintMatrix(MultiplyMatrix(vec1, vec2));
+            PrintMatrix(ChaosThreadMultiplyMatrix(raiseMatrix, oneMatrix));
+            // PrintMatrix(MakeMatrix(5, 5, 0.1, (x) => 2*x));
             Console.ReadKey();
         }
     }
