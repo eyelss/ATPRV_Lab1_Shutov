@@ -4,192 +4,193 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
-namespace ATPRV_Shutov_Lab1
-{
-    public static class ArrayExt {
-        public static IEnumerable<T> SliceColumn<T>(this T[,] array, int column)
-        {
-            for (var i = 0; i < array.GetLength(0); ++i)
-                yield return array[i, column];
-        }
 
-        public static IEnumerable<T> SliceRow<T>(this T[,] array, int row)
+namespace ATPRV_Shutov_Lab1;
+
+class Program
+{
+    public static void MatrixMultiply(int[,] matrix1, int[,] matrix2, int[,] result)
+    {
+        int y = matrix1.GetLength(0);
+        int x = matrix2.GetLength(1);
+        
+        for (int row = 0; row < y; ++row)
         {
-            // var o1 = array.GetLength(0);
-            // var o2 = array.GetLength(1);
-            for (var i = 0; i < array.GetLength(1); ++i)
-                yield return array[row, i];
+            for (int col = 0; col < x; ++col)
+            {
+                for (int index = 0; index < x; ++index)
+                {
+                    result[row, col] += matrix1[row, index] * matrix2[index, col];
+                }
+            }
         }
     }
 
-    class Program
+    public static void ThreadMatrixMultiply(int[,] matrix1, int[,] matrix2, int[,] result, int threadsCount)
     {
-        public static double[,] MultiplyMatrix(double[,] matrix1, double[,] matrix2, int from = -1, int to = -1, double[,]? templ = null)
+        int y = matrix1.GetLength(0);
+        int x = matrix2.GetLength(1);
+
+        var threads = new List<Thread>();
+
+        int rowsOnThread = y / threadsCount;
+        for (int threadIndex = 0; threadIndex < threadsCount; ++threadIndex)
         {
-            int xLength = matrix1.GetLength(0);
-            
-            if (from < 0)
-                from = 0;
-            
-            if (to < xLength)
-                to = xLength;
-            
-            if (from > xLength || to > xLength)
-                throw new IndexOutOfRangeException("Out of diapason of matrix.");
-            
-            double[,] result = templ ?? new double[to - from, matrix2.GetLength(1)];
-            for (int i = from; i < to; ++i)
+            int start = threadIndex * rowsOnThread;
+            int end = threadIndex == threadsCount - 1 ? y : threadIndex * rowsOnThread + rowsOnThread;
+
+            Thread t = new Thread(() =>
             {
-                for (int j = 0; j < matrix2.GetLength(1); ++j)
+                for (int row = start; row < end; ++row)
                 {
-                    result[j, i] = MultiplyRow(matrix1.SliceRow(i).ToArray(), matrix2.SliceColumn(j).ToArray());
-                }
-            }
-
-            return result;
-        }
-
-        public static void PrintMatrix(double[,] matrix)
-        {
-            for (int i = 0; i < matrix.GetLength(0); ++i)
-            {
-                for (int j = 0; j < matrix.GetLength(1); ++j)
-                {
-                    Console.Write($"{matrix[j, i]} ");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        public static double[,] ThreadMatrixMultiply(double[,] matrix1, double[,] matrix2, int threadCount, double[,]? templ = null)
-        {
-            Thread[] pool = new Thread[threadCount];
-            int currentThreadIndex = 0;
-            
-            var lenRows = matrix1.GetLength(0);
-            var threadPerRowsLen = lenRows / (float)threadCount;
-            int baseRowsLen = (int)threadPerRowsLen;
-
-            double[,] result = templ ?? new double[matrix1.GetLength(0), matrix2.GetLength(1)];
-            
-            for (int i = 0; i < threadCount; ++i)
-            {
-                int subRowsCount = (int)threadPerRowsLen;
-                if (threadCount - 1 == i)
-                {
-                    subRowsCount = (int)Math.Ceiling(threadPerRowsLen);
-                }
-
-
-                var i1 = i;
-                pool[currentThreadIndex] = new Thread(() =>
-                    MultiplyMatrix(matrix1, matrix2, i1 * baseRowsLen, i1 * baseRowsLen + subRowsCount, result));
-                pool[currentThreadIndex++].Start();
-            }
-            
-            foreach (var thread in pool)
-            {
-                thread.Join();
-            }
-
-            return result;
-        }
-
-        public static double[,] ChaosThreadMultiplyMatrix(double[,] matrix1, double[,] matrix2, double[,]? templ = null)
-        {
-            List<Thread> threads = new List<Thread>();
-
-            double[,] result = templ ?? new double[matrix1.GetLength(0), matrix2.GetLength(1)];
-            for (int i = 0; i < matrix1.GetLength(0); ++i)
-            {
-                for (int j = 0; j < matrix2.GetLength(1); ++j)
-                {
-                    var jCopy = j;
-                    var iCopy = i;
-                    var thread = new Thread(() =>
+                    for (int col = 0; col < x; ++col)
                     {
-                        result[jCopy, iCopy] = MultiplyRow(matrix1.SliceRow(iCopy).ToArray(), matrix2.SliceColumn(jCopy).ToArray()); 
+                        for (int index = 0; index < x; ++index)
+                        {
+                            result[row, col] += matrix1[row, index] * matrix2[index, col];
+                        }
+                    }
+                }
+            });
+            threads.Add(t);
+            t.Start();
+        }
+        
+        threads.ForEach(thread => thread.Join());
+    }
+
+    public static void ChaosMatrixMultiply(int[,] matrix1, int[,] matrix2, int[,] result)
+    {
+        int y = matrix1.GetLength(0);
+        int x = matrix2.GetLength(1);
+
+        var threads = new List<Thread>();
+        
+        for (int row = 0; row < y; ++row)
+        {
+            for (int col = 0; col < x; ++col)
+            {
+                for (int ind = 0; ind < x; ++ind)
+                {
+                    var rowCopy = row;
+                    var colCopy = col;
+                    var indCopy = ind;
+                    
+                    Thread t = new Thread(() =>
+                    {
+                        result[rowCopy, colCopy] += matrix1[rowCopy, indCopy] * matrix2[indCopy, colCopy]; 
                     });
-                    thread.Start();
-                    threads.Add(thread);
+                    
+                    t.Start();
+                    threads.Add(t);
                 }
             }
-
-            threads.ForEach(thread => thread.Join());
-            return result;
         }
+        
+        threads.ForEach(thread => thread.Join());
+    }
 
-        public static double MultiplyRow(double[] vector1, double[] vector2)
+    public static void PrintMatrix(int[,] matrix)
+    {
+        for (int i = 0; i < matrix.GetLength(0); ++i)
         {
-            return vector1.Zip(vector2, (first, second) => first * second).Sum();
-        }
-
-        public static double[,] MakeMatrix(int rows, int cols, double @base, Func<double, double> func)
-        {
-            double[,] result = new double[rows, cols];
-            double prev = @base;
-            
-            for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < matrix.GetLength(1); ++j)
             {
-                for (int j = 0; j < cols; j++)
-                {
-                    result[j, i] = prev;
-                    prev = func(prev);
-                }
+                Console.Write($"{matrix[j, i]} ");
             }
+            Console.WriteLine();
+        }
+    }
 
-            return result;
+    public static int[,] MakeMatrix(int rows, int cols, int @base, Func<int, int> func)
+    {
+        int[,] result = new int[rows, cols];
+        int prev = @base;
+            
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                result[j, i] = prev;
+                prev = func(prev);
+            }
         }
 
-        public static void Main(string[] args)
-        {
-            Stopwatch watch;
+        return result;
+    }
 
-            int[] matrixSizes = { 10, 50, 100 /*, 200, 500, 1000 */ };
-            List<double[,]> matrixes = new List<double[,]>();
-            
-            foreach (var size in matrixSizes)
+    public static void MatrixToZero(int[,] matrix)
+    {
+        int y = matrix.GetLength(0);
+        int x = matrix.GetLength(1);
+
+        for (int i = 0; i < y; ++i)
+        {
+            for (int j = 0; j < x; ++j)
             {
-                matrixes.Add(MakeMatrix(size, size, 1.0, (x) => x + 0.1));
+                matrix[i, j] = 0;
             }
+        }
+    } 
+
+    public static void Main(string[] args)
+    {
+        Stopwatch watch;
+
+        KeyValuePair<int[,], int[,]> a;
+        
+        int[] matrixSizes = { 10, 50, 100, 200, 300, 500, /* 1000 */ };
+        var matrixes = new List<KeyValuePair<int[,], int[,]>>();
+        foreach (var size in matrixSizes)
+        {
+            matrixes.Add(new KeyValuePair<int[,], int[,]>(
+                MakeMatrix(size, size, 1, x => x + 1),  // Multiplied matrix
+                MakeMatrix(size, size, 0, x => 0))      // Result template matrix
+            );
+
+        }
             
-            // CLASSIC:
-            Console.WriteLine("Classic");
+            
+        // CLASSIC:
+        Console.WriteLine("Classic");
+        matrixes.ForEach(matrix =>
+        {
+            watch = Stopwatch.StartNew();
+            MatrixMultiply(matrix.Key, matrix.Key, matrix.Value);
+            watch.Stop();
+            Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.Key.GetLength(0)}");
+        });
+        matrixes.ForEach(matrix => MatrixToZero(matrix.Value));
+        
+        
+        // PARALLEL 1:
+        Console.WriteLine("Parallel 1");
+        int[] threadsCount = { 2, 4, 8, 16 };
+
+        foreach (var threadCount in threadsCount)
+        {
+            Console.WriteLine($"    Threads: {threadCount}");
             matrixes.ForEach(matrix =>
             {
                 watch = Stopwatch.StartNew();
-                MultiplyMatrix(matrix, matrix);
+                ThreadMatrixMultiply(matrix.Key, matrix.Key, matrix.Value, threadCount);
                 watch.Stop();
-                Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
+                Console.WriteLine($"        Ms: {watch.ElapsedMilliseconds}; size: {matrix.Key.GetLength(0)}");
             });
-
-            // PARALLEL 1:
-            Console.WriteLine("Parallel 1");
-            int[] threadsCount = { 2, 4, 8, 16 };
-
-            foreach (var threadCount in threadsCount)
-            {
-                Console.WriteLine($"    Threads: {threadCount}");
-                matrixes.ForEach(matrix =>
-                {
-                    watch = Stopwatch.StartNew();
-                    ThreadMatrixMultiply(matrix, matrix, threadCount);
-                    watch.Stop();
-                    Console.WriteLine($"        Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
-                });
-            }
-
-            // PARALLEL 2:
-            Console.WriteLine("Parallel 2");
-            matrixes.ForEach(matrix =>
-            {
-                watch = Stopwatch.StartNew();
-                ChaosThreadMultiplyMatrix(matrix, matrix);
-                watch.Stop();
-                Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.GetLength(0)}");
-            });
-
-            Console.ReadKey();
+            matrixes.ForEach(matrix => MatrixToZero(matrix.Value));
         }
+
+        // PARALLEL 2:
+        Console.WriteLine("Parallel 2");
+        matrixes.ForEach(matrix =>
+        {
+            watch = Stopwatch.StartNew();
+            ChaosMatrixMultiply(matrix.Key, matrix.Key, matrix.Value);
+            watch.Stop();
+            Console.WriteLine($"    Ms: {watch.ElapsedMilliseconds}; size: {matrix.Value.GetLength(0)}");
+        });
+
+        // PrintMatrix(MultiplyMatrix(MakeMatrix(2, 2, 1, x => x + 1), MakeMatrix(2, 2, 1, x => x)));
+        // Console.ReadKey();
     }
 }
